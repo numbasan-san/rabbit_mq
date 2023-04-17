@@ -9,13 +9,14 @@ conn_param = pika.ConnectionParameters('localhost')
 conn = pika.BlockingConnection(conn_param)
 channel = conn.channel()
 
-channel.exchange_declare(exchange='routing', exchange_type=ExchangeType.direct)
+channel.exchange_declare(exchange='topic', exchange_type=ExchangeType.topic)
+
 queue = channel.queue_declare(queue='', exclusive=True)
 
-channel.queue_bind(exchange='routing', queue=queue.method.queue, routing_key='analytics_only')
-channel.queue_bind(exchange='routing', queue=queue.method.queue, routing_key='both')
+channel.queue_bind(exchange='topic', queue=queue.method.queue, routing_key='*.europe.*')
 
-channel.basic_consume(queue=queue.method.queue, auto_ack=True, on_message_callback=on_message_received)
+channel.basic_consume(queue=queue.method.queue, auto_ack=True,
+    on_message_callback=on_message_received)
 
 print('Analytics Starting Consuming')
 
